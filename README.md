@@ -18,10 +18,10 @@ To get started, you'll need to install the required Python libraries: `numpy`, `
 
 ```bash
 pip install numpy gradio pydicom
+```
 
 ## Run
-Run the program named `mri_app.py`, the program will generate an url link. E.g.:
-`Running on local URL:  http://127.0.0.1:7860`
+Run the program named `mri_app.py`, the program will generate an url link. E.g.:`Running on local URL:  http://127.0.0.1:7860`
 
 Copy the url and open it in your web browser.
 
