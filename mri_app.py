@@ -11,34 +11,33 @@ def normalize_array(arr):
         return arr  # Avoid division by zero if all values are the same
     return (arr - arr_min) / (arr_max - arr_min)
 
-def dSIR(r1_map, TIs, TIi, min_value, max_value):
-    dsir_value = (np.exp(-TIs * r1_map) - np.exp(-TIi * r1_map)) / (
-            1 - np.exp(-TIs * r1_map) - np.exp(-TIi * r1_map) + np.exp(-15000 * r1_map)
-    )
-    # dsir_value = (
+def dSIR(r1_map, r2_map, TE, TIs, TIi, min_value, max_value):
+    # dsir_value = np.exp(-TIs * r1_map) - np.exp(-TIi * r1_map) / (
     #         1 - np.exp(-TIs * r1_map) - np.exp(-TIi * r1_map) + np.exp(-15000 * r1_map)
-    # ) / (np.exp(-TIs * r1_map) - np.exp(-TIi * r1_map))
+    # )
+    dsir_value = (abs(1 - 2 * np.exp(-TIs * r1_map) + np.exp(-15000 * r1_map)) - abs(1- 2 * np.exp(-TIi * r1_map) + np.exp(-15000 * r1_map))) / (abs(1 - 2 * np.exp(-TIs * r1_map) + np.exp(-15000 * r1_map)) + abs(1 - 2 * np.exp(-TIi * r1_map) + np.exp(-15000 * r1_map)))
     return np.clip(dsir_value, min_value, max_value)
     # return (np.exp(-TIs * r1_map) - np.exp(-TIi * r1_map))
-def open_and_display_mri(data_path, slice_id, TIs, TIi, min_value, max_value):
+def open_and_display_mri(r1_data_path, slice_id, TIs, TIi, min_value, max_value):
     if slice_id < 100:
         formatted_slice_index = f"{slice_id+1:02d}"
     else:
         formatted_slice_index = f"{slice_id+1:03d}"
-    dicom_path = os.path.join(data_path, f"SLICE_{formatted_slice_index}.dcm")
+    r1_dicom_path = os.path.join(r1_data_path, f"SLICE_{formatted_slice_index}.dcm")
 
-    dicom_data = pydicom.dcmread(dicom_path)
+    r1_dicom_data = pydicom.dcmread(r1_dicom_path)
 
     # Extract the rescale slope and intercept
-    rescale_slope = dicom_data.RescaleSlope
-    rescale_intercept = dicom_data.RescaleIntercept
+    rescale_slope = r1_dicom_data.RescaleSlope
+    rescale_intercept = r1_dicom_data.RescaleIntercept
 
     # Convert pixel data to a numpy array
-    pixel_array = dicom_data.pixel_array
+    r1_pixel_array = r1_dicom_data.pixel_array
     # Apply the rescaling and convert to ms^-1
-    r1_map = (pixel_array * rescale_slope + rescale_intercept) / 1000
-    non_zero_mask = r1_map != 0
-    dSIR_value = np.where(non_zero_mask, dSIR(r1_map, TIs, TIi, min_value, max_value), r1_map)
+    r1_map = (r1_pixel_array * rescale_slope + rescale_intercept) / 1000
+    r1_non_zero_mask = r1_map != 0
+
+    dSIR_value = np.where(r1_non_zero_mask, dSIR(r1_map, TIs, TIi, min_value, max_value), r1_map)
     #
     dSIR_value = normalize_array(dSIR_value)
     # dSIR_value = normalize_array(pixel_array)
