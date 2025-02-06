@@ -1,7 +1,5 @@
 # dSIR
 
-# My Python Program
-
 ## Overview
 This Python program uses `Gradio` to provide an interactive interface and includes libraries such as `numpy` and `pydicom` for data processing. The interface will provide a link once you run the program, allowing you to interact with it in your browser.
 
